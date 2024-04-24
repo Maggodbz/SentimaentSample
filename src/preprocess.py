@@ -49,9 +49,9 @@ def clean_and_save_dataset(root_path, output_path, csv_name):
 """
 if __name__ == "__main__":
     # Path where the CSV file is stored
-    ROOT_PATH = 'data/Raw/'
+    ROOT_PATH = 'sentimaent_sample/data/Raw/'
     # Path where the cleaned CSV will be saved
-    OUTPUT_PATH = 'data/Processed/'
+    OUTPUT_PATH = 'sentimaent_sample/data/Processed/'
     # Name of the CSV file containing the training data
     CSV_NAME = 'test.csv'
 
