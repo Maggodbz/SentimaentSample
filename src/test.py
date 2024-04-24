@@ -1,55 +1,10 @@
-from sklearn.metrics import accuracy_score
-from torch.utils.data import DataLoader
 import os
 import torch
+import pandas as pd
 import pytorch_lightning as pl
 from transformers import BertTokenizer
-import pandas as pd
-import torch
-from torch.utils.data import DataLoader, Dataset
-import pytorch_lightning as pl
-from pytorch_lightning import Trainer
-import pandas as pd
-import torchtext
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
 
 # Define your PyTorch Lightning model class
-
-
-class SentimentDataset(Dataset):
-    def __init__(self, dataframe, max_length=256):
-        self.dataframe = dataframe
-        self.tokenizer = get_tokenizer('basic_english')
-        self.vocab = build_vocab_from_iterator(self._yield_tokens(
-            dataframe['text']), specials=["<unk>", "<pad>"])
-        self.vocab.set_default_index(self.vocab["<unk>"])
-        self.max_length = max_length
-        self.pad_idx = self.vocab['<pad>']
-
-        # Convert sentiment to categorical codes
-        self.labels = dataframe['sentiment'].astype('category').cat.codes
-
-    def _yield_tokens(self, data):
-        for text in data:
-            yield self.tokenizer(text)
-
-    def __len__(self):
-        return len(self.dataframe)
-
-    def __getitem__(self, idx):
-        text = self.dataframe.iloc[idx]['text']
-        label = self.labels[idx]  # Directly use pre-converted label
-        tokenized_text = self.vocab(self.tokenizer(text))
-        if len(tokenized_text) > self.max_length:
-            tokenized_text = tokenized_text[:self.max_length]
-        else:
-            tokenized_text += [self.pad_idx] * \
-                (self.max_length - len(tokenized_text))
-        return torch.tensor(tokenized_text, dtype=torch.long), torch.tensor(label, dtype=torch.long)
-
-    def get_vocab(self):
-        return self.vocab
 
 
 class SimpleSentimentModel(pl.LightningModule):
@@ -72,18 +27,15 @@ class SimpleSentimentModel(pl.LightningModule):
         return optimizer
 
 
-def predict_sentiment(text, model, vocab, tokenizer):
+def predict_sentiment(text, model, vocab, tokenizer, sentiment_labels):
     tokenized_text = [vocab.get(token, vocab['<unk>'])
                       for token in tokenizer.tokenize(text)]
-    input_tensor = torch.tensor([tokenized_text], dtype=torch.long).to(
-        model.device)  # Move input tensor to the same device as model
+    input_tensor = torch.tensor(
+        [tokenized_text], dtype=torch.long).to(model.device)
     with torch.no_grad():
         output = model(input_tensor)
-        predicted_sentiment = torch.argmax(output, dim=1).item()
-    return predicted_sentiment
-
-
-# Function to load model from checkpoint
+        predicted_index = torch.argmax(output, dim=1).item()
+    return sentiment_labels[predicted_index]  # Return the sentiment label
 
 
 def load_model_from_checkpoint(checkpoint_path, vocab_size, pad_index):
@@ -93,7 +45,7 @@ def load_model_from_checkpoint(checkpoint_path, vocab_size, pad_index):
         pad_index=pad_index
     )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)  # Move model to appropriate device
+    model.to(device)
     model.eval()
     return model
 
@@ -106,44 +58,33 @@ def load_vocab(vocab_file):
     return vocab
 
 
-# Assuming the classes are already defined/imported above as mentioned
-# SentimentDataset, SimpleSentimentModel, load_model_from_checkpoint, load_vocab
+def main(input_text, model_version, root_path):
+    vocab_file = 'vocab.txt'
+    vocab = load_vocab(vocab_file)
+    vocab_size = len(vocab)
+    pad_index = vocab['<pad>']
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    # Define the valid sentiment labels
+    sentiment_labels = ['neutral', 'negative', 'positive']
+
+    checkpoint_directory = os.path.join(
+        root_path, model_version, "checkpoints")
+    checkpoint_files = [f for f in os.listdir(
+        checkpoint_directory) if f.endswith('.ckpt')]
+    if not checkpoint_files:
+        raise FileNotFoundError("No checkpoint files found.")
+    checkpoint_path = os.path.join(checkpoint_directory, checkpoint_files[0])
+
+    model = load_model_from_checkpoint(checkpoint_path, vocab_size, pad_index)
+
+    sentiment = predict_sentiment(
+        input_text, model, vocab, tokenizer, sentiment_labels)
+    print(f"Predicted sentiment: {sentiment}")
 
 
-def evaluate_model(data_path, model, vocab, tokenizer, batch_size=16):
-    # Load the data
-    df = pd.read_csv(data_path)
-    dataset = SentimentDataset(df, max_length=256)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+if __name__ == "__main__":
+    MODEL_VERSION = 'version_0'
+    ROOT_PATH = '/home/marco/Repos/learning/school_presentation/lightning_logs'
+    INPUT_TEXT = "I`d have responded, if I were going"
 
-    all_predictions = []
-    all_labels = []
-
-    # Evaluate the model
-    model.eval()  # Set the model to evaluation mode
-    with torch.no_grad():
-        for texts, labels in dataloader:
-            texts = texts.to(model.device)  # Move to the same device as model
-            outputs = model(texts)
-            predictions = torch.argmax(outputs, dim=1)
-            all_predictions.extend(predictions.cpu().numpy())
-            all_labels.extend(labels.cpu().numpy())
-
-    # Calculate accuracy
-    accuracy = accuracy_score(all_labels, all_predictions)
-    return accuracy
-
-
-# Load the vocabulary and model as done previously
-vocab = load_vocab('vocab.txt')  # Adjust this to your actual vocab file path
-vocab_size = len(vocab)
-pad_index = vocab['<pad>']
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = load_model_from_checkpoint('/home/marco/Repos/learning/school_presentation/lightning_logs/version_1/checkpoints/epoch=9-step=8590.ckpt', vocab_size, pad_index)
-
-# Set the path to your CSV file
-csv_path = '/home/marco/Repos/learning/school_presentation/cleaned_test_indexed.csv'
-
-# Evaluate the model
-accuracy = evaluate_model(csv_path, model, vocab, tokenizer)
-print(f"Model Accuracy: {accuracy}")
+    main(INPUT_TEXT, MODEL_VERSION, ROOT_PATH)

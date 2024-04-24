@@ -19,4 +19,11 @@ links to famous examples of AI
 
 # Process
 
+- Download Data from the internet (kaggle)
+- Preprocess the data
+- Train the model
+- Test the model
+- Evaluate the model
+
+
 # Workshop
