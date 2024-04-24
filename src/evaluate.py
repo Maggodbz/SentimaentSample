@@ -140,8 +140,8 @@ def find_checkpoints(directory):
 """
 
 if __name__ == "__main__":
-    DATA_PATH = '/home/marco/Repos/learning/sentimaent_sample/data/Processed/test.csv'
-    CHECKPOINT_DIRECTORY = '/home/marco/Repos/learning/sentimaent_sample/lightning_logs'
+    DATA_PATH = 'sentimaent_sample/data/Processed/test.csv'
+    CHECKPOINT_DIRECTORY = 'sentimaent_sample/lightning_logs'
     VOCAB_FILE = 'vocab.txt'
     
     main(DATA_PATH, CHECKPOINT_DIRECTORY, VOCAB_FILE)
