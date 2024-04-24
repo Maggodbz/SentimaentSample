@@ -6,6 +6,7 @@ import pandas as pd
 =====================================================================
 """
 
+
 def clean_and_save_dataset(root_path, output_path, csv_name):
     """Loads, cleans, and saves the dataset."""
     # Load the dataset
@@ -34,9 +35,11 @@ def clean_and_save_dataset(root_path, output_path, csv_name):
     # Save the cleaned dataset with index
     output_csv_name = csv_name  # Use the same file name
     df = df[['text', 'sentiment']]  # Keep only the necessary columns
-    df.to_csv(output_path + output_csv_name, index=True, index_label='Index', quoting=1, sep=',', encoding='utf-8')
+    df.to_csv(output_path + output_csv_name, index=True,
+              index_label='Index', quoting=1, sep=',', encoding='utf-8')
 
-    print(f"Dataset has been cleaned and saved to '{output_path + output_csv_name}' with index.")
+    print(
+        f"Dataset has been cleaned and saved to '{output_path + output_csv_name}' with index.")
 
 
 """
@@ -50,6 +53,6 @@ if __name__ == "__main__":
     # Path where the cleaned CSV will be saved
     OUTPUT_PATH = 'data/Processed/'
     # Name of the CSV file containing the training data
-    CSV_NAME = 'test.csv'
+    CSV_NAME = 'train.csv'
 
     clean_and_save_dataset(ROOT_PATH, OUTPUT_PATH, CSV_NAME)

@@ -84,7 +84,7 @@ def main(input_text, model_version, root_path):
 
 if __name__ == "__main__":
     MODEL_VERSION = 'version_0'
-    ROOT_PATH = '/home/marco/Repos/learning/school_presentation/lightning_logs'
+    ROOT_PATH = '/home/marco/Repos/learning/sentimaent_sample/lightning_logs'
     INPUT_TEXT = "I`d have responded, if I were going"
 
     main(INPUT_TEXT, MODEL_VERSION, ROOT_PATH)
