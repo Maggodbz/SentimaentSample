@@ -53,6 +53,6 @@ if __name__ == "__main__":
     # Path where the cleaned CSV will be saved
     OUTPUT_PATH = 'data/Processed/'
     # Name of the CSV file containing the training data
-    CSV_NAME = 'train.csv'
+    CSV_NAME = 'test.csv'
 
     clean_and_save_dataset(ROOT_PATH, OUTPUT_PATH, CSV_NAME)

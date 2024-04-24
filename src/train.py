@@ -112,9 +112,9 @@ if __name__ == "__main__":
     CSV_NAME = 'train.csv'
     # Decides how many ('text', 'sentiment') pairs are predicted at once
     # before the model is updated
-    BATCH_SIZE = 64
+    BATCH_SIZE = 1
     # How many times the model sees the training data
-    MAX_EPOCHS = 25
+    MAX_EPOCHS = 1
     # Determines how fast the model learns from the data
     LEARNING_RATE = 0.002
 

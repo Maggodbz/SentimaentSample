@@ -82,9 +82,16 @@ def main(input_text, model_version, root_path):
     print(f"Predicted sentiment: {sentiment}")
 
 
+
+"""
+=====================================================================
+---------------------- Settings Section -----------------------------
+=====================================================================
+"""
+
 if __name__ == "__main__":
-    MODEL_VERSION = 'version_0'
+    MODEL_VERSION = 'version_1'
     ROOT_PATH = '/home/marco/Repos/learning/sentimaent_sample/lightning_logs'
-    INPUT_TEXT = "I`d have responded, if I were going"
+    INPUT_TEXT = "i am sick"
 
     main(INPUT_TEXT, MODEL_VERSION, ROOT_PATH)
