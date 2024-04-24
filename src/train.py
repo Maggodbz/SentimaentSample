@@ -107,7 +107,7 @@ def main(data_root_dir, csv_name, batch_size, max_epochs, learning_rate):
 """
 if __name__ == "__main__":
     # Folder in which the data is stored
-    DATA_ROOT_DIR = 'data/Processed/'
+    DATA_ROOT_DIR = 'sentimaent_sample/data/Processed/'
     # Name of the CSV file containing the training data
     CSV_NAME = 'train.csv'
     # Decides how many ('text', 'sentiment') pairs are predicted at once
